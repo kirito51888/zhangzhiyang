@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Zhang ZhiYang\u0027s Portfolio",
+  "description": "张志洋 (Zhiyang Zhang) 的个人作品集网页，展示其在数字化转型、财务合规、内控审计领域的实习经历以及 AI + 财经项目。",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
