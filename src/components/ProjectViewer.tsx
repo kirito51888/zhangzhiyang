@@ -99,28 +99,69 @@ export default function ProjectViewer({ project }: ProjectViewerProps) {
     };
   };
 
-  // SmartSpare-AI Simulator State
-  const [degradation, setDegradation] = useState(65);
-  const [budget, setBudget] = useState(450); // in thousand RMB
+  // Deloitte-Diagram-Generator Simulator State
+  const [selectedProcess, setSelectedProcess] = useState<'p2p' | 'capex' | 'maintenance'>('p2p');
+  const [diagramMode, setDiagramMode] = useState<'asis' | 'tobe'>('asis');
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const spareParts = [
-    { name: '大型转子 A-30', downtimeLoss: 1200, cost: 280, criticalLevel: '高' },
-    { name: '高精密绝缘轴承 B-12', downtimeLoss: 600, cost: 95, criticalLevel: '中' },
-    { name: '自润滑密封圈 S-08', downtimeLoss: 150, cost: 15, criticalLevel: '高' },
-    { name: '辅助冷凝器 V-55', downtimeLoss: 450, cost: 180, criticalLevel: '低' },
-  ];
+  const processTemplates = {
+    p2p: {
+      name: '采购至付款 (P2P) 业财流程',
+      asisBreakpointsCount: 4,
+      efficiencyBoost: '+82%',
+      asisSteps: [
+        { step: 1, title: '供应商准入与报价', desc: '线下微信/纸质沟通报价', tag: '断点：线下先行，无系统记录', status: 'error' },
+        { step: 2, title: '采购合同签署', desc: '人工审批盖章，审批流转滞后', tag: '断点：权责交叉，缺少系统联动', status: 'warning' },
+        { step: 3, title: '货物到场验收', desc: '库管手工填写纸质送货单', tag: '断点：账实不同步', status: 'error' },
+        { step: 4, title: '财务暂估与结算', desc: '月末手工录入发票，平均延迟15天', tag: '断点：暂估滞后，系统断点', status: 'error' },
+      ],
+      tobeSteps: [
+        { step: 1, title: 'SRM 线上供应商准入', desc: '资质自动核验 & 线上询比价', tag: '自动化率 95%', status: 'success' },
+        { step: 2, title: '电子合同与规则流转', desc: '智能关联 PO 与资金计划预占', tag: '业财规则自动穿透', status: 'success' },
+        { step: 3, title: 'WMS 扫码到货入库', desc: '一物一码识别，实时推送财务', tag: '账实秒级协同', status: 'success' },
+        { step: 4, title: 'AI 自动三方匹配结算', desc: '三单匹配自动生成会计凭证', tag: '结算效率提效 80%+', status: 'success' },
+      ]
+    },
+    capex: {
+      name: '工程建设与暂估流程',
+      asisBreakpointsCount: 3,
+      efficiencyBoost: '+85%',
+      asisSteps: [
+        { step: 1, title: '施工节点推进', desc: '施工方按进度打桩与节点交付', tag: '正常线下施工', status: 'info' },
+        { step: 2, title: '监理验收签署', desc: '纸质盖章报告，流转耗时长', tag: '断点：信息传递滞后', status: 'warning' },
+        { step: 3, title: '工程暂估处理', desc: '财务未收到通告，季度末补调', tag: '断点：工程暂估严重滞后', status: 'error' },
+        { step: 4, title: '资金款项支付', desc: '超期无预警，费用跨期不准', tag: '断点：资金计划失真', status: 'error' },
+      ],
+      tobeSteps: [
+        { step: 1, title: 'PMS 节点线上打卡', desc: '移动端上传图纸与影像凭证', tag: '全程数字留痕', status: 'success' },
+        { step: 2, title: 'AI 监理报告分析', desc: '智能识别工程进度与工程量', tag: '自动触发暂估规则', status: 'success' },
+        { step: 3, title: '实时工程暂估入账', desc: '自动计算应暂估金额与税额', tag: '规避费用跨期风险', status: 'success' },
+        { step: 4, title: '资金计划动态预警', desc: '配合资金流动性预测安排付款', tag: '资金占用降低15%', status: 'success' },
+      ]
+    },
+    maintenance: {
+      name: '资产维修与一物一码流程',
+      asisBreakpointsCount: 3,
+      efficiencyBoost: '+80%',
+      asisSteps: [
+        { step: 1, title: '设备故障口头报修', desc: '车间人员线下通知维修工', tag: '无工单记录', status: 'warning' },
+        { step: 2, title: '领用零星备件', desc: '仓库人工凭纸质条开领', tag: '断点：一物一码缺失', status: 'error' },
+        { step: 3, title: '维修成本归集', desc: '成本无法准确分摊至具体设备', tag: '断点：账实不符，归集粗糙', status: 'error' },
+      ],
+      tobeSteps: [
+        { step: 1, title: 'EAM 智能工单生成', desc: 'IoT 自动感知故障报警并派单', tag: '响应时间缩短 70%', status: 'success' },
+        { step: 2, title: '扫码领料 & 一物一码', desc: '唯一 RFID/条码全链路追踪', tag: '备件库存 100% 准确', status: 'success' },
+        { step: 3, title: 'AI 成本归集与 ROI 分析', desc: '自动计入设备明细账并预测重置', tag: '资产生命周期可溯', status: 'success' },
+      ]
+    }
+  };
 
-  // Calculate spare parts recommendations based on degradation & budget
-  const calculateROI = (cost: number, loss: number, critLevel: string) => {
-    const riskFactor = degradation / 100;
-    const probability = critLevel === '高' ? 0.45 : critLevel === '中' ? 0.25 : 0.10;
-    const expectedLoss = loss * riskFactor * probability * 12; // annualized risk
-    const netSavings = expectedLoss - cost;
-    const roi = (netSavings / cost) * 100;
-    return {
-      riskSaved: expectedLoss.toFixed(1),
-      roi: Math.max(0, Math.round(roi))
-    };
+  const handleSimulateAIGenerate = () => {
+    setIsGenerating(true);
+    setTimeout(() => {
+      setIsGenerating(false);
+      setDiagramMode('tobe');
+    }, 800);
   };
 
   // FundControl-AI Simulator State
@@ -364,100 +405,135 @@ export default function ProjectViewer({ project }: ProjectViewerProps) {
                   );
                 })()}
 
-                {/* 2. SMARTSPARE-AI SIMULATOR */}
-                {project.id === 'smartspare-ai' && (
+                {/* 2. DELOITTE-DIAGRAM-GENERATOR SIMULATOR */}
+                {project.id === 'deloitte-diagram-generator' && (
                   <div className="flex-1 flex flex-col gap-4 text-slate-300">
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                      {/* Left: Input Variables */}
+                      {/* Left: Template & Controls */}
                       <div className="md:col-span-5 bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-4">
                         <p className="text-xs font-semibold text-slate-400 flex items-center gap-1.5 border-b border-slate-800 pb-2">
-                          <Sliders className="w-3.5 h-3.5 text-emerald-400" /> 调节控制参数
+                          <Workflow className="w-3.5 h-3.5 text-emerald-400" /> 选定业务场景模板
                         </p>
-                        
-                        {/* Control 1: Degradation */}
+
                         <div className="space-y-2">
-                          <div className="flex justify-between text-xs">
-                            <span className="text-slate-400">核心轴承/转子老化劣化率</span>
-                            <span className="text-rose-400 font-bold font-mono">{degradation}%</span>
-                          </div>
-                          <input 
-                            type="range" 
-                            min="20" 
-                            max="95" 
-                            value={degradation}
-                            onChange={(e) => setDegradation(Number(e.target.value))}
-                            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" 
-                          />
-                          <p className="text-[10px] text-slate-500">反映设备磨损状态，老化度越高，停机断货损失率越大</p>
+                          {(Object.keys(processTemplates) as Array<keyof typeof processTemplates>).map((key) => {
+                            const template = processTemplates[key];
+                            return (
+                              <button
+                                key={key}
+                                onClick={() => {
+                                  setSelectedProcess(key);
+                                  setDiagramMode('asis');
+                                }}
+                                className={`w-full p-2.5 rounded-xl border text-left transition duration-200 cursor-pointer flex flex-col gap-1 ${
+                                  selectedProcess === key
+                                    ? 'bg-slate-800 border-emerald-500 text-white shadow-md'
+                                    : 'bg-slate-950/60 border-slate-800 hover:bg-slate-800/40 text-slate-400'
+                                }`}
+                              >
+                                <span className="text-xs font-bold text-slate-200">{template.name}</span>
+                                <div className="flex items-center justify-between text-[10px]">
+                                  <span className="text-rose-400 font-mono">发现断点: {template.asisBreakpointsCount} 个</span>
+                                  <span className="text-emerald-400 font-bold font-mono">预估提效: {template.efficiencyBoost}</span>
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
 
-                        {/* Control 2: Budget */}
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-xs">
-                            <span className="text-slate-400">计划备件采购预算限制</span>
-                            <span className="text-emerald-400 font-bold font-mono">{budget}k 元</span>
-                          </div>
-                          <input 
-                            type="range" 
-                            min="50" 
-                            max="800" 
-                            step="50"
-                            value={budget}
-                            onChange={(e) => setBudget(Number(e.target.value))}
-                            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" 
-                          />
-                          <p className="text-[10px] text-slate-500">调整备件池预算，限制备件采购数量</p>
+                        {/* Trigger AI Auto Flowchart Generation */}
+                        <div className="pt-2">
+                          <button
+                            onClick={handleSimulateAIGenerate}
+                            disabled={isGenerating}
+                            className="w-full py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10 disabled:opacity-50"
+                          >
+                            <Workflow className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
+                            <span>{isGenerating ? 'AI 正在解析生成 To-Be 图谱...' : '生成 To-Be 优化流程图'}</span>
+                          </button>
                         </div>
                       </div>
 
-                      {/* Right: Results Priority & ROI */}
-                      <div className="md:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                      {/* Right: Flowchart Visualizer Container */}
+                      <div className="md:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between min-h-[280px]">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                            <span className="text-xs font-bold text-slate-300">资产采购推荐优先级 & 资金 ROI 测算</span>
-                            <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-semibold font-mono">
-                              <TrendingUp className="w-3.5 h-3.5" /> 智能优化
+                            <span className="text-xs font-bold text-slate-200 flex items-center gap-2">
+                              <span>{processTemplates[selectedProcess].name}</span>
+                              <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold ${
+                                diagramMode === 'asis' 
+                                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' 
+                                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                              }`}>
+                                {diagramMode === 'asis' ? 'As-Is 现状诊断图' : 'To-Be AI 优化图'}
+                              </span>
                             </span>
+
+                            <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 text-[10px] font-medium text-slate-400">
+                              <button
+                                onClick={() => setDiagramMode('asis')}
+                                className={`px-2.5 py-0.5 rounded transition cursor-pointer ${
+                                  diagramMode === 'asis' ? 'bg-slate-800 text-rose-300 font-bold' : 'hover:text-slate-200'
+                                }`}
+                              >
+                                As-Is 现状
+                              </button>
+                              <button
+                                onClick={() => setDiagramMode('tobe')}
+                                className={`px-2.5 py-0.5 rounded transition cursor-pointer ${
+                                  diagramMode === 'tobe' ? 'bg-slate-800 text-emerald-300 font-bold' : 'hover:text-slate-200'
+                                }`}
+                              >
+                                To-Be 目标
+                              </button>
+                            </div>
                           </div>
 
-                          <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-                            {spareParts.map((part, index) => {
-                              const calc = calculateROI(part.cost, part.downtimeLoss, part.criticalLevel);
-                              const affordable = part.cost <= budget;
-                              
-                              return (
-                                <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 text-xs">
-                                  <div className="space-y-0.5">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-semibold text-slate-200">{part.name}</span>
-                                      <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold ${
-                                        part.criticalLevel === '高' 
-                                          ? 'bg-rose-500/15 text-rose-400' 
-                                          : part.criticalLevel === '中'
-                                          ? 'bg-amber-500/15 text-amber-400'
-                                          : 'bg-slate-500/15 text-slate-400'
-                                      }`}>
-                                        关键度: {part.criticalLevel}
-                                      </span>
-                                    </div>
-                                    <p className="text-[10px] text-slate-500 font-mono">成本: {part.cost}k | 规避潜在年损失: {calc.riskSaved}k</p>
+                          {/* Flowchart Steps Stream */}
+                          <div className="space-y-2 max-h-[190px] overflow-y-auto pr-1">
+                            {(diagramMode === 'asis' 
+                              ? processTemplates[selectedProcess].asisSteps 
+                              : processTemplates[selectedProcess].tobeSteps
+                            ).map((item, idx) => (
+                              <div 
+                                key={idx} 
+                                className={`p-2.5 rounded-lg border text-xs flex items-center justify-between transition duration-200 ${
+                                  item.status === 'error'
+                                    ? 'bg-rose-950/30 border-rose-800/50 text-rose-200'
+                                    : item.status === 'warning'
+                                    ? 'bg-amber-950/30 border-amber-800/50 text-amber-200'
+                                    : 'bg-emerald-950/30 border-emerald-800/50 text-emerald-200'
+                                }`}
+                              >
+                                <div className="space-y-0.5 flex-1 pr-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-4 h-4 bg-slate-800 text-slate-300 rounded-full font-mono text-[10px] flex items-center justify-center shrink-0">
+                                      {item.step}
+                                    </span>
+                                    <span className="font-bold text-slate-100">{item.title}</span>
                                   </div>
-
-                                  <div className="text-right">
-                                    <span className="text-emerald-400 font-bold font-mono text-xs">ROI {calc.roi}%</span>
-                                    <p className="text-[9px] text-slate-500">
-                                      {affordable ? '预算内·建议购入' : '超出可用预算'}
-                                    </p>
-                                  </div>
+                                  <p className="text-[10px] text-slate-400 pl-6">{item.desc}</p>
                                 </div>
-                              );
-                            })}
+
+                                <span className={`text-[10px] px-2 py-0.5 rounded font-mono shrink-0 font-semibold ${
+                                  item.status === 'error'
+                                    ? 'bg-rose-500/20 text-rose-300'
+                                    : item.status === 'warning'
+                                    ? 'bg-amber-500/20 text-amber-300'
+                                    : 'bg-emerald-500/20 text-emerald-300'
+                                }`}>
+                                  {item.tag}
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         </div>
 
-                        <div className="border-t border-slate-800 pt-3 mt-3 flex items-center justify-between text-[11px] text-slate-500 font-mono">
-                          <span className="flex items-center gap-1 text-emerald-400/80"><DollarSign className="w-3.5 h-3.5" /> 本轮已识别百万级成本优化空间</span>
-                          <span>SmartModel V2.1</span>
+                        <div className="border-t border-slate-800 pt-2 mt-2 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                          <span className="flex items-center gap-1 text-emerald-400/90">
+                            <Workflow className="w-3.5 h-3.5" /> 已连通 Mermaid/BPMN 引擎
+                          </span>
+                          <span>Deloitte Flowchart Engine V2.0</span>
                         </div>
                       </div>
                     </div>
