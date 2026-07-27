@@ -60,26 +60,6 @@ export const businessProjects: BusinessProject[] = [
 
 export const softwareProjects: SoftwareProject[] = [
   {
-    id: 'smart-repair',
-    name: 'SmartRepair',
-    chineseName: '智能设备维修与故障诊断决策系统',
-    tagline: '面向工业制造与资产运维的 AI 驱动智能报修、故障诊断与维修决策平台',
-    tags: ['智能维修', '故障诊断', 'EAM运维', 'AI决策'],
-    description: '针对工业设备维保耗时长、故障诊断门槛高、成本归集不清晰等痛点设计的智能维修管理系统。整合 AI 大模型故障诊断、智能派单、备件关联与维修成本归集分析，实现设备全生命周期高效运维。',
-    highlights: [
-      'AI 智能故障诊断：输入设备异常现象或错误码，秒级生成精准排错方案与标准化维修指导。',
-      '工单流转与备件联动：打通设备工单报修与一物一码备件领用，降低设备停机时间 40%+。',
-      '维修成本归集与决策分析：精准归集工时与备件成本至具体设备，提供设备重置/大修 ROI 决策支持。'
-    ],
-    githubUrl: 'https://github.com/kirito51888/SmartRepair',
-    vercelUrl: 'https://smart-repair-eight.vercel.app',
-    mockupFeatures: [
-      { title: 'AI 故障排错诊断', description: '基于大模型与维修知识库，智能推荐排错方案与步骤。', icon: 'Wrench' },
-      { title: '智能派单与领料', description: '一键关联一物一码备件库，实现维修工单实时协同。', icon: 'ClipboardList' },
-      { title: '维修成本穿透分析', description: '多维度统计设备维保频次与成本，辅助重置与决策。', icon: 'BarChart3' }
-    ]
-  },
-  {
     id: 'deloitte-diagram-generator',
     name: 'Deloitte-Diagram-Generator',
     chineseName: '德勤 AI 流程图生成工具',
@@ -97,6 +77,26 @@ export const softwareProjects: SoftwareProject[] = [
       { title: '自然语言/结构化流程生成', description: '解析业务逻辑文本，自动识别节点、分支决策与断点高亮。', icon: 'Workflow' },
       { title: '咨询交付标准化', description: '统一团队流程图排版与样式规范，提高专业咨询报告的交付一致性。', icon: 'FileCode' },
       { title: '一键导出与云端协作', description: '支持导出高清 SVG/PNG 与结构化代码，方便嵌入 Word/PPT 或 Web 看板。', icon: 'Share2' }
+    ]
+  },
+  {
+    id: 'smart-repair',
+    name: 'SmartRepair',
+    chineseName: '智能设备维修与故障诊断决策系统',
+    tagline: '面向工业制造与资产运维的 AI 驱动智能报修、故障诊断与维修决策平台',
+    tags: ['智能维修', '故障诊断', 'EAM运维', 'AI决策'],
+    description: '针对工业设备维保耗时长、故障诊断门槛高、成本归集不清晰等痛点设计的智能维修管理系统。整合 AI 大模型故障诊断、智能派单、备件关联与维修成本归集分析，实现设备全生命周期高效运维。',
+    highlights: [
+      'AI 智能故障诊断：输入设备异常现象或错误码，秒级生成精准排错方案与标准化维修指导。',
+      '工单流转与备件联动：打通设备工单报修与一物一码备件领用，降低设备停机时间 40%+。',
+      '维修成本归集与决策分析：精准归集工时与备件成本至具体设备，提供设备重置/大修 ROI 决策支持。'
+    ],
+    githubUrl: 'https://github.com/kirito51888/SmartRepair',
+    vercelUrl: 'https://smart-repair-eight.vercel.app',
+    mockupFeatures: [
+      { title: 'AI 故障排错诊断', description: '基于大模型与维修知识库，智能推荐排错方案与步骤。', icon: 'Wrench' },
+      { title: '智能派单与领料', description: '一键关联一物一码备件库，实现维修工单实时协同。', icon: 'ClipboardList' },
+      { title: '维修成本穿透分析', description: '多维度统计设备维保频次与成本，辅助重置与决策。', icon: 'BarChart3' }
     ]
   },
   {
@@ -179,8 +179,8 @@ export const chatQAPairs = [
     keywords: ['智能', '产品', '大模型', 'smartrepair', 'deloitte-diagram', 'fundcontrol', 'vercel', 'github', '代码', '流程图', '维修'],
     question: '你开发了哪些 AI + 财经相关的作品？它们的商业价值是什么？',
     answer: `针对现代财务数字化与咨询交付的痛点，我全栈设计并开发了 3 款 **AI + 财经/咨询** 创新作品（已开源并在 Vercel 部署稳定运行）：
-1. 🛠️ **SmartRepair (智能设备维修与故障诊断决策系统)**：针对工业设备维保耗时长、诊断门槛高、成本归集不清晰痛点设计的 AI 运维决策平台，整合智能排错、派单与成本归集。
-2. 📐 **Deloitte-Diagram-Generator (德勤 AI 流程图生成工具)**：面向数字化咨询流程建模的 AI 工具，输入业务逻辑即可秒级自动生成标准 As-Is/To-Be 流程图，建模效率提升 80%+。
+1. 📐 **Deloitte-Diagram-Generator (德勤 AI 流程图生成工具)**：面向数字化咨询流程建模的 AI 工具，输入业务逻辑即可秒级自动生成标准 As-Is/To-Be 流程图，建模效率提升 80%+。
+2. 🛠️ **SmartRepair (智能设备维修与故障诊断决策系统)**：针对工业设备维保耗时长、诊断门槛高、成本归集不清晰痛点设计的 AI 运维决策平台，整合智能排错、派单与成本归集。
 3. 📊 **FundControl-AI (集团资金流动性与穿透式风控系统)**：业财深度融合的动态资金监控与穿透式财务预警平台，捕捉工程暂估滞后、费用跨期等业财断点并进行风险预警。`
   },
   {

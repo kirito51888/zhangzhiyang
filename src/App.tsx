@@ -93,7 +93,7 @@ export default function App() {
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 bg-slate-900/5 px-3 py-1.5 rounded-full border border-slate-900/10 text-xs font-semibold text-slate-800">
                 <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                <span>2027届优秀候选人 · 寻求数字化/咨询/审计实践</span>
+                <span>2027届毕业生 · 聚焦财务数字化转型/咨询/供应链相关岗位</span>
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-extrabold tracking-tight text-gray-900 leading-[1.1]">
@@ -102,7 +102,7 @@ export default function App() {
               </h1>
               
               <p className="text-base text-gray-600 max-w-xl leading-relaxed">
-                我是张志洋，就读于上海立信会计金融学院审计学专业。我专注于将大模型应用、数据分析等数字技术引入传统财务审计与价值评估，在<b>德勤中国（数字化咨询）</b>、<b>上海市政府（财务合规）</b>、<b>上海电气（内控审计）</b>均拥有深度的数字化落地经验。
+                我是张志洋，就读于上海立信会计金融学院审计学专业。通过<b>上海电气（内审/财务）</b>与<b>上海市人民政府发展研究中心（财务合规）</b>的实习经历，我逐步熟悉了企业财务与业务流程、信息系统及关键风险控制点；在<b>德勤中国（数字化转型咨询）</b>实习中，进一步参与大模型应用、数据分析等数字技术在业务流程优化与数字化转型项目中的落地。我希望连接业务、财务与技术，运用数字化工具进行转型。
               </p>
             </div>
 
