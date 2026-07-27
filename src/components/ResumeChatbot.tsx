@@ -10,7 +10,7 @@ export default function ResumeChatbot() {
     {
       id: 'init-1',
       sender: 'assistant',
-      text: '您好！我是由小米大模型 mimo-v2.5-pro 驱动的张志洋 AI 简历助理。我深度了解志洋的教育背景、德勤与政府实习经历、商业大赛成果以及他自研的 AssetPilot-AI、SmartSpare-AI、FundControl-AI 等创新系统。您可以通过点击下方推荐问题，或直接在输入框中向我提问！',
+      text: '您好！我是由小米大模型 mimo-v2.5-pro 驱动的张志洋 AI 简历助理。我深度了解志洋的教育背景、德勤与政府实习经历、商业大赛成果以及他自研的 Deloitte-Diagram-Generator、SmartRepair、FundControl-AI 等创新系统。您可以通过点击下方推荐问题，或直接在输入框中向我提问！',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
