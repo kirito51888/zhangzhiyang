@@ -295,74 +295,51 @@ export default function App() {
             </div>
           </div>
 
-          {/* Vertical Timeline Container */}
-          <div className="relative space-y-8 before:absolute before:top-3 before:bottom-3 before:left-4 md:before:left-6 before:w-0.5 before:bg-gray-200">
+          {/* Timeline list */}
+          <div className="space-y-12 relative before:absolute before:inset-0 before:left-6 before:md:left-1/2 before:-translate-x-px before:bg-gray-100 before:pointer-events-none">
             {internshipData.map((job, idx) => {
-              const companyTags: Record<string, { label: string; color: string }> = {
-                '德勤管理咨询（上海）有限公司': { label: 'Big 4 咨询 · 数字化交付', color: 'bg-emerald-50 text-emerald-700 border-emerald-200/60' },
-                '上海市人民政府发展研究中心': { label: '政府财政智囊 · 合规管控', color: 'bg-blue-50 text-blue-700 border-blue-200/60' },
-                '上海电气集团上海电机厂/锅炉厂有限公司': { label: '电气制造龙头 · 内审/财务', color: 'bg-amber-50 text-amber-800 border-amber-200/60' },
-              };
-              const companyMeta = companyTags[job.company] || { label: '名企实习', color: 'bg-slate-50 text-slate-700 border-slate-200' };
-
+              const isEven = idx % 2 === 0;
               return (
                 <motion.div 
                   key={idx} 
-                  className="relative pl-9 md:pl-14"
-                  initial={{ opacity: 0, y: 25 }}
+                  className={`flex flex-col md:flex-row relative gap-8 md:gap-0 ${
+                    isEven ? 'md:flex-row-reverse' : ''
+                  }`}
+                  initial={{ opacity: 0, y: 35 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-80px" }}
-                  transition={{ duration: 0.5, delay: idx * 0.1, ease: "easeOut" }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.6, delay: idx * 0.1, ease: "easeOut" }}
                 >
                   {/* Timeline Dot Indicator */}
-                  <div className="absolute left-4 md:left-6 -translate-x-1/2 top-6 w-4 h-4 bg-white border-2 border-slate-900 rounded-full z-10 shadow-xs flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-2 border-slate-900 rounded-full z-10 top-1.5 shadow-sm"></div>
+
+                  {/* Date Column */}
+                  <div className="w-full md:w-1/2 pl-12 md:pl-0 md:px-8 flex md:justify-end text-left md:text-right">
+                    <div className={`space-y-1 ${isEven ? 'md:text-left md:mr-auto' : 'md:text-right md:ml-auto'}`}>
+                      <span className="text-xs font-mono font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                        {job.period}
+                      </span>
+                      <h4 className="text-lg font-display font-bold text-gray-900 mt-2">{job.company}</h4>
+                      <p className="text-sm font-semibold text-slate-500">{job.title}</p>
+                    </div>
                   </div>
 
-                  {/* Internship Card */}
-                  <div className="bg-white border border-gray-200/80 rounded-2xl p-6 md:p-8 shadow-xs hover:shadow-md transition-all duration-300 space-y-5 group">
-                    {/* Top Header Bar */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-lg md:text-xl font-display font-bold text-gray-900 group-hover:text-emerald-700 transition-colors">
-                            {job.company}
-                          </h3>
-                          <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-md border ${companyMeta.color}`}>
-                            {companyMeta.label}
-                          </span>
+                  {/* Space / Content Column */}
+                  <div className="w-full md:w-1/2 pl-12 md:pl-0 md:px-8">
+                    <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-200 space-y-4">
+                      {job.highlights.map((high, hIdx) => (
+                        <div key={hIdx} className="space-y-1 text-xs text-gray-600 leading-relaxed">
+                          {/* Parse bold titles in resume bullets if any */}
+                          {high.includes('：') ? (
+                            <p>
+                              <b className="text-slate-800">{high.split('：')[0]}：</b>
+                              <span>{high.split('：')[1]}</span>
+                            </p>
+                          ) : (
+                            <p>{high}</p>
+                          )}
                         </div>
-                        <p className="text-xs md:text-sm font-semibold text-slate-600 flex items-center gap-2">
-                          <Building className="w-4 h-4 text-slate-400 shrink-0" />
-                          <span>{job.title}</span>
-                        </p>
-                      </div>
-
-                      <div className="shrink-0">
-                        <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/60">
-                          <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                          {job.period}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Highlights List */}
-                    <div className="space-y-3">
-                      {job.highlights.map((high, hIdx) => {
-                        const hasColon = high.includes('：');
-                        const title = hasColon ? high.split('：')[0] : '';
-                        const detail = hasColon ? high.split('：')[1] : high;
-
-                        return (
-                          <div key={hIdx} className="flex items-start gap-2.5 text-xs md:text-sm text-gray-600 leading-relaxed group/item">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-2 group-hover/item:scale-125 transition-transform"></span>
-                            <div>
-                              {title && <b className="text-slate-900 font-bold mr-1">{title}：</b>}
-                              <span className="text-gray-600">{detail}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
+                      ))}
                     </div>
                   </div>
                 </motion.div>
