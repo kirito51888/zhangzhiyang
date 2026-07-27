@@ -18,7 +18,12 @@ import {
   Database,
   Sliders,
   ChevronDown,
-  LayoutDashboard
+  LayoutDashboard,
+  Wrench,
+  ClipboardList,
+  BarChart3,
+  Activity,
+  CheckCircle2
 } from 'lucide-react';
 
 interface ProjectViewerProps {
@@ -29,74 +34,66 @@ export default function ProjectViewer({ project }: ProjectViewerProps) {
   const [viewMode, setViewMode] = useState<'iframe' | 'simulator'>('iframe');
   const [iframeKey, setIframeKey] = useState(0);
 
-  // AssetPilot-AI Simulator State
-  const [selectedAssetIdx, setSelectedAssetIdx] = useState<number>(0);
-  const [deprMethod, setDeprMethod] = useState<'linear' | 'double_declining' | 'sum_years'>('linear');
-  const [projectionYears, setProjectionYears] = useState<number>(5);
+  // SmartRepair Simulator State
+  const [selectedFaultIdx, setSelectedFaultIdx] = useState<number>(0);
+  const [isDiagnosingFault, setIsDiagnosingFault] = useState<boolean>(false);
 
-  const assetsList = [
-    { name: '大型重型智能机床 (德勤诊断车间)', cost: 1200, life: 10, salvageRate: 0.05, code: 'AP-2026-001' },
-    { name: '企业级大模型算力集群 (集团总部)', cost: 450, life: 5, salvageRate: 0.03, code: 'AP-2026-002' },
-    { name: '智慧无人立体仓库 (华东制造分厂)', cost: 800, life: 15, salvageRate: 0.08, code: 'AP-2026-003' }
+  const faultCases = [
+    {
+      code: 'E-402',
+      device: '5轴 CNC 数控加工中心 (主轴电机过热)',
+      severity: '高风险',
+      symptom: '主轴降速，转轴温升超 85℃，伺服驱动器报 E-402 过载报警',
+      aiDiagnosis: '主轴循环冷却油路堵塞或高速动平衡损坏导致摩擦生热，需停机排查。',
+      steps: [
+        '使用红外测温仪精准定位主轴前后轴承座温度分布',
+        '检查冷却油泵系统循环压力（标称值 0.35 MPa）',
+        '一网通调取【伺服轴承 SKF-7014】备件扫码出库',
+        '更换滤芯并完成动平衡对中校验，自动将工时费与备件计入 EAM 成本'
+      ],
+      partsNeeded: 'SKF-7014 高精密绝缘轴承 x1, 合成冷却油 5L',
+      estimatedHours: '2.5 工时',
+      costSummary: '备件 1,280 元 + 工时 300 元 = 1,580 元 (实时穿透入账)'
+    },
+    {
+      code: 'P-109',
+      device: '液压动力站 (高压泵站压力骤降)',
+      severity: '中风险',
+      symptom: '主泵站压力由 16 MPa 降至 6 MPa，系统伴随高频泄压振动音',
+      aiDiagnosis: '电磁溢流阀阀芯异物卡滞或高压胶管密封垫圈微渗漏，无法建立系统稳压。',
+      steps: [
+        '切断主回路电源，释放蓄能器内部残余液压',
+        '测量溢流阀电磁铁线圈电阻及接线端子电压',
+        '扫码领用【电磁溢流阀 DB10-1-5X】与氟胶密封圈',
+        '清洗阀块内部油道并复位安装，系统在线压力复核测试'
+      ],
+      partsNeeded: '电磁溢流阀 DB10-1-5X x1, 氟胶 O 型圈套装 x1',
+      estimatedHours: '1.5 工时',
+      costSummary: '备件 850 元 + 工时 180 元 = 1,030 元 (实时穿透入账)'
+    },
+    {
+      code: 'PLC-08',
+      device: 'PROFINET 工业现场总线 (通讯中断)',
+      severity: '低风险',
+      symptom: '主控 PLC 与 3# 远程 I/O 从站丢失心频握手，数据刷新中断',
+      aiDiagnosis: '总线网线屏蔽层接地不良受强电干扰，或 24V 辅助电源模块纹波超标。',
+      steps: [
+        '使用示波器测量 24V 辅助电源纹波，核验接地电阻 < 4Ω',
+        '更换老化严重之工业以太网 M12-X Code 金属接头',
+        '重新加载 GSDML 硬件组态文件，恢复总线心跳协同'
+      ],
+      partsNeeded: 'M12-X Code 工业屏蔽网头 x2',
+      estimatedHours: '0.8 工时',
+      costSummary: '备件 120 元 + 工时 100 元 = 220 元 (实时穿透入账)'
+    }
   ];
 
-  const calculateDepreciation = (cost: number, life: number, salvageRate: number, method: 'linear' | 'double_declining' | 'sum_years', years: number) => {
-    const salvageValue = cost * salvageRate;
-    const depreciableAmount = cost - salvageValue;
-    const activeYears = Math.min(years, life);
-    
-    let accumulated = 0;
-    
-    if (method === 'linear') {
-      const annual = depreciableAmount / life;
-      accumulated = annual * activeYears;
-    } else if (method === 'double_declining') {
-      const rate = 2 / life;
-      let tempBookValue = cost;
-      for (let i = 1; i <= activeYears; i++) {
-        if (i === life) {
-          const dep = Math.max(0, tempBookValue - salvageValue);
-          accumulated += dep;
-          tempBookValue -= dep;
-        } else {
-          let dep = tempBookValue * rate;
-          if (tempBookValue - dep < salvageValue) {
-            dep = Math.max(0, tempBookValue - salvageValue);
-          }
-          accumulated += dep;
-          tempBookValue -= dep;
-        }
-      }
-    } else {
-      const sum = (life * (life + 1)) / 2;
-      for (let i = 1; i <= activeYears; i++) {
-        const rate = (life - i + 1) / sum;
-        accumulated += depreciableAmount * rate;
-      }
-    }
-    
-    const netBookValue = Math.max(salvageValue, cost - accumulated);
-    const actualAccumulated = cost - netBookValue;
-    const deprPercent = (actualAccumulated / cost) * 100;
-    
-    let recommendation = '资产处于正常服役期，继续持有';
-    let urgencyColor = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
-    
-    if (deprPercent >= 80 || activeYears >= life) {
-      recommendation = '【高危警告】资产已接近折旧年限/残值，建议启动 CapEx 重置计划';
-      urgencyColor = 'text-rose-400 bg-rose-500/10 border-rose-500/20';
-    } else if (deprPercent >= 50) {
-      recommendation = '【预警提示】累计折旧超过 50%，建议在下年度预算中备足重置资金';
-      urgencyColor = 'text-amber-400 bg-amber-500/10 border-amber-500/20';
-    }
-    
-    return {
-      accumulated: actualAccumulated.toFixed(2),
-      netBookValue: netBookValue.toFixed(2),
-      deprPercent: deprPercent.toFixed(1),
-      recommendation,
-      urgencyColor
-    };
+  const handleTriggerDiagnose = (idx: number) => {
+    setSelectedFaultIdx(idx);
+    setIsDiagnosingFault(true);
+    setTimeout(() => {
+      setIsDiagnosingFault(false);
+    }, 500);
   };
 
   // Deloitte-Diagram-Generator Simulator State
@@ -286,118 +283,111 @@ export default function ProjectViewer({ project }: ProjectViewerProps) {
                   </div>
                 </div>
 
-                {/* 1. ASSETPILOT-AI SIMULATOR */}
-                {project.id === 'assetpilot-ai' && (() => {
-                  const currentAsset = assetsList[selectedAssetIdx];
-                  const depr = calculateDepreciation(currentAsset.cost, currentAsset.life, currentAsset.salvageRate, deprMethod, projectionYears);
-                  
+                {/* 1. SMARTREPAIR SIMULATOR */}
+                {project.id === 'smart-repair' && (() => {
+                  const currentCase = faultCases[selectedFaultIdx];
                   return (
                     <div className="flex-1 flex flex-col gap-4 text-slate-300">
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        {/* Left: Asset Selection & Config */}
-                        <div className="md:col-span-5 space-y-3">
-                          {/* Asset selector */}
-                          <div className="space-y-1.5">
-                            <p className="text-xs font-semibold text-slate-400">选择要分析的资产类别</p>
-                            <div className="space-y-1.5">
-                              {assetsList.map((asset, idx) => (
-                                <button
-                                  key={idx}
-                                  onClick={() => setSelectedAssetIdx(idx)}
-                                  className={`w-full p-2.5 rounded-xl border text-left transition duration-200 cursor-pointer flex flex-col gap-0.5 ${
-                                    selectedAssetIdx === idx
-                                      ? 'bg-slate-800 border-emerald-500 text-white shadow-lg shadow-emerald-500/5'
-                                      : 'bg-slate-900/60 border-slate-800 hover:bg-slate-800/40 hover:border-slate-700 text-slate-300'
-                                  }`}
-                                >
-                                  <span className="text-[10px] font-mono text-slate-500">{asset.code}</span>
-                                  <span className="text-xs font-semibold truncate">{asset.name}</span>
-                                  <span className="text-[11px] text-slate-400 font-mono">原始账面原值: {asset.cost} 万元</span>
-                                </button>
-                              ))}
-                            </div>
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                        {/* Left: Fault Case Selector */}
+                        <div className="md:col-span-5 bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-4">
+                          <p className="text-xs font-semibold text-slate-400 flex items-center gap-1.5 border-b border-slate-800 pb-2">
+                            <Wrench className="w-3.5 h-3.5 text-emerald-400" /> 选择设备报修与故障现象
+                          </p>
+
+                          <div className="space-y-2">
+                            {faultCases.map((fCase, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => handleTriggerDiagnose(idx)}
+                                className={`w-full p-2.5 rounded-xl border text-left transition duration-200 cursor-pointer flex flex-col gap-1 ${
+                                  selectedFaultIdx === idx
+                                    ? 'bg-slate-800 border-emerald-500 text-white shadow-md'
+                                    : 'bg-slate-950/60 border-slate-800 hover:bg-slate-800/40 text-slate-400'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-mono font-bold text-emerald-400">{fCase.code}</span>
+                                  <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold ${
+                                    fCase.severity === '高风险'
+                                      ? 'bg-rose-500/20 text-rose-300'
+                                      : fCase.severity === '中风险'
+                                      ? 'bg-amber-500/20 text-amber-300'
+                                      : 'bg-emerald-500/20 text-emerald-300'
+                                  }`}>
+                                    {fCase.severity}
+                                  </span>
+                                </div>
+                                <span className="text-xs font-bold text-slate-200 truncate">{fCase.device}</span>
+                                <p className="text-[10px] text-slate-400 line-clamp-1">{fCase.symptom}</p>
+                              </button>
+                            ))}
                           </div>
 
-                          {/* Method Selector */}
-                          <div className="space-y-1.5">
-                            <p className="text-xs font-semibold text-slate-400">选择折旧方法模型</p>
-                            <div className="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800 text-[10px] font-medium text-slate-400">
-                              {[
-                                { id: 'linear', name: '直线法' },
-                                { id: 'double_declining', name: '双倍余额' },
-                                { id: 'sum_years', name: '年数总和' }
-                              ].map((m) => (
-                                <button
-                                  key={m.id}
-                                  onClick={() => setDeprMethod(m.id as any)}
-                                  className={`py-1 px-1 rounded-md transition cursor-pointer text-center ${
-                                    deprMethod === m.id
-                                      ? 'bg-slate-800 text-white shadow-sm font-semibold'
-                                      : 'hover:text-slate-200'
-                                  }`}
-                                >
-                                  {m.name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Projection Slider */}
-                          <div className="space-y-1.5">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-400">预测折旧年限</span>
-                              <span className="text-emerald-400 font-bold font-mono">{projectionYears} 年</span>
-                            </div>
-                            <input 
-                              type="range" 
-                              min="1" 
-                              max="15" 
-                              value={projectionYears}
-                              onChange={(e) => setProjectionYears(Number(e.target.value))}
-                              className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" 
-                            />
-                            <p className="text-[9px] text-slate-500">向后推演折旧曲线，评估资产寿命与报表影响</p>
-                          </div>
+                          <button
+                            onClick={() => handleTriggerDiagnose(selectedFaultIdx)}
+                            disabled={isDiagnosingFault}
+                            className="w-full py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10 disabled:opacity-50"
+                          >
+                            <Cpu className={`w-4 h-4 ${isDiagnosingFault ? 'animate-spin' : ''}`} />
+                            <span>{isDiagnosingFault ? 'AI 正在推理诊断根因...' : '触发 AI 故障诊断与派单'}</span>
+                          </button>
                         </div>
 
-                        {/* Right: Simulation Output */}
-                        <div className="md:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between min-h-[250px]">
+                        {/* Right: AI Output & Decision */}
+                        <div className="md:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between min-h-[280px]">
                           <div className="space-y-3">
                             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                              <span className="text-xs font-bold text-slate-300">折旧仿真与资产重置决策看板</span>
-                              <span className="text-[10px] font-mono text-slate-500">AssetModel V3.1</span>
+                              <span className="text-xs font-bold text-slate-200 flex items-center gap-2">
+                                <span>{currentCase.device}</span>
+                                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                  {currentCase.code}
+                                </span>
+                              </span>
+                              <span className="text-[10px] font-mono text-slate-500">SmartRepair Engine V2.0</span>
                             </div>
 
-                            {/* Data points */}
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800/60">
-                                <span className="text-[10px] text-slate-500 block">累计折旧总额</span>
-                                <span className="text-sm font-bold font-mono text-rose-400">{depr.accumulated} 万元</span>
-                                <span className="text-[9px] text-slate-500 block font-mono">折旧占比: {depr.deprPercent}%</span>
+                            {/* AI Diagnosis Summary */}
+                            <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs space-y-1">
+                              <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-[11px]">
+                                <Cpu className="w-3.5 h-3.5" /> AI 大模型根因诊断 (RCA):
                               </div>
-                              <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800/60">
-                                <span className="text-[10px] text-slate-500 block">资产账面净值 (Net)</span>
-                                <span className="text-sm font-bold font-mono text-emerald-400">{depr.netBookValue} 万元</span>
-                                <span className="text-[9px] text-slate-500 block font-mono">预计残值率: {(currentAsset.salvageRate * 100).toFixed(0)}%</span>
+                              <p className="text-slate-300 text-[11px] leading-relaxed">{currentCase.aiDiagnosis}</p>
+                            </div>
+
+                            {/* Diagnostic Steps */}
+                            <div className="space-y-1.5">
+                              <p className="text-[10px] font-bold text-slate-400 font-mono">推导排错步骤与标准化处置：</p>
+                              <div className="space-y-1 max-h-[120px] overflow-y-auto pr-1">
+                                {currentCase.steps.map((step, sIdx) => (
+                                  <div key={sIdx} className="flex items-start gap-2 text-[11px] text-slate-300 p-1.5 rounded bg-slate-950/40 border border-slate-800/60">
+                                    <span className="w-4 h-4 bg-emerald-500/20 text-emerald-300 rounded-full text-[9px] font-bold font-mono flex items-center justify-center shrink-0 mt-0.5">
+                                      {sIdx + 1}
+                                    </span>
+                                    <span>{step}</span>
+                                  </div>
+                                ))}
                               </div>
                             </div>
 
-                            {/* Intelligently Generated Advice */}
-                            <div className={`p-2.5 rounded-lg border text-xs leading-relaxed flex gap-2 items-start ${depr.urgencyColor}`}>
-                              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                              <div className="space-y-1">
-                                <p className="font-semibold text-slate-200">CapEx 预测与重置规划：</p>
-                                <p className="text-slate-300 text-[11px] leading-tight">{depr.recommendation}</p>
+                            {/* Cost & Parts Ledger */}
+                            <div className="grid grid-cols-2 gap-2 text-[10px] pt-1">
+                              <div className="p-2 rounded bg-slate-950 border border-slate-800 space-y-0.5">
+                                <span className="text-slate-500 block font-mono">一物一码备件领用</span>
+                                <span className="text-slate-200 font-semibold">{currentCase.partsNeeded}</span>
+                              </div>
+                              <div className="p-2 rounded bg-slate-950 border border-slate-800 space-y-0.5">
+                                <span className="text-slate-500 block font-mono">预估工时与成本穿透</span>
+                                <span className="text-emerald-400 font-bold font-mono">{currentCase.costSummary}</span>
                               </div>
                             </div>
                           </div>
 
-                          <div className="border-t border-slate-800 pt-3 mt-3 flex items-center justify-between text-[10px] text-slate-500 font-mono">
-                            <span className="flex items-center gap-1">
-                              <Sliders className="w-3.5 h-3.5 text-emerald-500" /> 
-                              {projectionYears > currentAsset.life ? `注意：预测年数已超该资产 ${currentAsset.life} 年折旧寿命` : '计算依据符合企业会计准则 (CAS 4号)'}
+                          <div className="border-t border-slate-800 pt-2 mt-2 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                            <span className="flex items-center gap-1 text-emerald-400/90">
+                              <BarChart3 className="w-3.5 h-3.5" /> 已连通 EAM 资产管理账单
                             </span>
-                            <span>模型已穿透</span>
+                            <span>实时归集至设备明细账目</span>
                           </div>
                         </div>
                       </div>

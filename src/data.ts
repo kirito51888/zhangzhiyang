@@ -60,23 +60,23 @@ export const businessProjects: BusinessProject[] = [
 
 export const softwareProjects: SoftwareProject[] = [
   {
-    id: 'assetpilot-ai',
-    name: 'AssetPilot-AI',
-    chineseName: '集团资产折旧与资本开支预测系统',
-    tagline: '基于大模型与财务模型的集团固定资产全生命周期预测与资本开支(CapEx)智能决策平台',
-    tags: ['资产折旧', '大模型应用', 'CapEx决策', '折旧预测'],
-    description: '专为集团化企业设计的固定资产全生命周期管理系统。结合大模型决策链与经典折旧算法（直线法、双倍余额递减法），精准预测集团多子公司的未来折旧开支与重置成本，辅助CapEx预算智能分配。',
+    id: 'smart-repair',
+    name: 'SmartRepair',
+    chineseName: '智能设备维修与故障诊断决策系统',
+    tagline: '面向工业制造与资产运维的 AI 驱动智能报修、故障诊断与维修决策平台',
+    tags: ['智能维修', '故障诊断', 'EAM运维', 'AI决策'],
+    description: '针对工业设备维保耗时长、故障诊断门槛高、成本归集不清晰等痛点设计的智能维修管理系统。整合 AI 大模型故障诊断、智能派单、备件关联与维修成本归集分析，实现设备全生命周期高效运维。',
     highlights: [
-      '多模式折旧自动仿真：支持一键在直线法、年数总和法、双倍余额递减法间对比切换，秒级生成 10 年期折旧预测。',
-      '智能重置与CapEx预测：结合设备运行工况与大模型，智能预测设备最佳重置时点，规避资产闲置或超期服役风险。',
-      '多子公司预算穿透：集团可一键下钻穿透到各下属制造厂的特定设备分类，掌握全面折旧曲线。'
+      'AI 智能故障诊断：输入设备异常现象或错误码，秒级生成精准排错方案与标准化维修指导。',
+      '工单流转与备件联动：打通设备工单报修与一物一码备件领用，降低设备停机时间 40%+。',
+      '维修成本归集与决策分析：精准归集工时与备件成本至具体设备，提供设备重置/大修 ROI 决策支持。'
     ],
-    githubUrl: 'https://github.com/2926690348-max/AssetPilot-AI',
-    vercelUrl: 'https://asset-pilot-ai.vercel.app/',
+    githubUrl: 'https://github.com/kirito51888/SmartRepair',
+    vercelUrl: 'https://smart-repair-eight.vercel.app',
     mockupFeatures: [
-      { title: '多维折旧模拟', description: '一键对比多种计提算法（直线法、递减法），智能预测未来资产折旧走势。', icon: 'TrendingUp' },
-      { title: 'CapEx智能规划', description: '基于大模型预测设备更新生命周期，辅助集团合理分配资本开支。', icon: 'Sliders' },
-      { title: '子公司资产下钻', description: '支持跨地域、多子公司固定资产的穿透式统计与对比分析看板。', icon: 'LayoutDashboard' }
+      { title: 'AI 故障排错诊断', description: '基于大模型与维修知识库，智能推荐排错方案与步骤。', icon: 'Wrench' },
+      { title: '智能派单与领料', description: '一键关联一物一码备件库，实现维修工单实时协同。', icon: 'ClipboardList' },
+      { title: '维修成本穿透分析', description: '多维度统计设备维保频次与成本，辅助重置与决策。', icon: 'BarChart3' }
     ]
   },
   {
@@ -176,10 +176,10 @@ export const chatQAPairs = [
 3. **审计证据链与底稿编制**：独立抽查合同凭证 **200+ 份**，反馈 10+ 异常事项，补充 20+ 审计证据形成完整证据链，协助完成 **10+ 份审计底稿编制**。`
   },
   {
-    keywords: ['智能', '产品', '大模型', 'assetpilot', 'deloitte-diagram', 'fundcontrol', 'vercel', 'github', '代码', '流程图'],
+    keywords: ['智能', '产品', '大模型', 'smartrepair', 'deloitte-diagram', 'fundcontrol', 'vercel', 'github', '代码', '流程图', '维修'],
     question: '你开发了哪些 AI + 财经相关的作品？它们的商业价值是什么？',
     answer: `针对现代财务数字化与咨询交付的痛点，我全栈设计并开发了 3 款 **AI + 财经/咨询** 创新作品（已开源并在 Vercel 部署稳定运行）：
-1. 🪙 **AssetPilot-AI (集团资产折旧与资本开支预测系统)**：结合大模型决策链与折旧估算模型，支持直线法、双倍余额递减法等自动切换仿真，提供 CapEx 资本开支合理化建议。
+1. 🛠️ **SmartRepair (智能设备维修与故障诊断决策系统)**：针对工业设备维保耗时长、诊断门槛高、成本归集不清晰痛点设计的 AI 运维决策平台，整合智能排错、派单与成本归集。
 2. 📐 **Deloitte-Diagram-Generator (德勤 AI 流程图生成工具)**：面向数字化咨询流程建模的 AI 工具，输入业务逻辑即可秒级自动生成标准 As-Is/To-Be 流程图，建模效率提升 80%+。
 3. 📊 **FundControl-AI (集团资金流动性与穿透式风控系统)**：业财深度融合的动态资金监控与穿透式财务预警平台，捕捉工程暂估滞后、费用跨期等业财断点并进行风险预警。`
   },
@@ -197,7 +197,7 @@ export const chatQAPairs = [
 
 - 🎓 **教育背景与专业资质**：上海立信会计金融学院审计学专业（2027届），GPA 3.67/4.0 (专业前 15%)，获校二等/三等奖学金，持初级会计师证书，英语 CET-6 577分。
 - 💼 **名企实习背书**：在德勤管理咨询（数字化转型与出海咨询）、上海市人民政府发展研究中心（财务合规）、上海电气集团（内控审计）均有深度实习经验。
-- 💡 **AI 创新力与全栈技术**：熟悉的 Codex、SQL 工具，不仅自研开发了提效 80%+ 的德勤 AI 流程图生成工具，还全栈开发并上线了 AssetPilot-AI、FundControl-AI 等 AI 预测与风控系统。
+- 💡 **AI 创新力与全栈技术**：熟悉的 Codex、SQL 工具，不仅自研开发了提效 80%+ 的德勤 AI 流程图生成工具，还全栈开发并上线了 SmartRepair、FundControl-AI 等 AI 预测与风控系统。
 - 🗣️ **综合软实力**：曾任院辩论队队长，拥有极强的高压沟通、结构化表达与商务答辩能力。`
   },
   {
