@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, MessageSquare, ChevronRight } from 'lucide-react';
-import { chatQAPairs, defaultBotResponses } from '../data';
+import { getSmartAnswer } from '../data';
 import { ChatMessage } from '../types';
 import { motion } from 'motion/react';
 import Markdown from 'react-markdown';
@@ -83,24 +83,8 @@ export default function ResumeChatbot() {
     } catch (error) {
       console.warn("AI Chat API failed, activating high-fidelity local fallback:", error);
 
-      // Local keyword-matching fallback mechanism
-      let matchedAnswer = '';
-      const lowercaseQuery = text.toLowerCase();
-
-      for (const pair of chatQAPairs) {
-        const matchesKeyword = pair.keywords.some(
-          (kw) => lowercaseQuery.includes(kw.toLowerCase()) || text.includes(kw)
-        );
-        if (matchesKeyword) {
-          matchedAnswer = pair.answer;
-          break;
-        }
-      }
-
-      if (!matchedAnswer) {
-        const defaultIndex = Math.floor(Math.random() * defaultBotResponses.length);
-        matchedAnswer = defaultBotResponses[defaultIndex];
-      }
+      // Local intelligent NLP fallback mechanism
+      const matchedAnswer = getSmartAnswer(text);
 
       // Ensure a natural-feeling typing delay of at least 1200ms for fallback
       const elapsedTime = Date.now() - startTime;

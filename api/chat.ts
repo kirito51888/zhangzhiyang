@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { chatQAPairs, defaultBotResponses } from "../src/data";
+import { chatQAPairs, defaultBotResponses, getSmartAnswer } from "../src/data";
 
 const SYSTEM_PROMPT = `
 你是由小米大模型 mimo-v2.5-pro 驱动的张志洋 AI 贴身助理（也称专属小秘书）。
@@ -56,26 +56,9 @@ const SYSTEM_PROMPT = `
    - 保持诚实。如果用户问及志洋未披露的私人隐私，引导他们查看页面下方的官方联系卡片（微信、邮箱、GitHub）来直接联系志洋本人。
 `;
 
-// Heuristic fallback matching function
+// Heuristic fallback matching function using smart NLP engine
 function getHeuristicAnswer(text: string): string {
-  let matchedAnswer = "";
-  const lowercaseQuery = text.toLowerCase();
-
-  for (const pair of chatQAPairs) {
-    const matchesKeyword = pair.keywords.some(
-      (kw) => lowercaseQuery.includes(kw.toLowerCase()) || text.includes(kw)
-    );
-    if (matchesKeyword) {
-      matchedAnswer = pair.answer;
-      break;
-    }
-  }
-
-  if (!matchedAnswer) {
-    const defaultIndex = Math.floor(Math.random() * defaultBotResponses.length);
-    matchedAnswer = defaultBotResponses[defaultIndex];
-  }
-
+  const matchedAnswer = getSmartAnswer(text);
   // Ensure absolutely no asterisks exist in the fallback response
   return matchedAnswer.replace(/\*/g, "");
 }
@@ -98,7 +81,17 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { messages } = req.body;
+  // Safely parse body if Vercel serverless passes it as a string
+  let rawBody = req.body;
+  if (typeof rawBody === "string") {
+    try {
+      rawBody = JSON.parse(rawBody);
+    } catch (e) {
+      // Keep as is
+    }
+  }
+
+  const messages = rawBody?.messages;
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: "Invalid messages array" });
   }
